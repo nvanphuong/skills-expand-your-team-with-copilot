@@ -25,6 +25,14 @@ These dependencies will be installed when you run `pip install -r src/requiremen
 
 ## Debugging
 
+### Checking activity sharing
+
+With Node.js 22 or newer installed, run the sharing checks without additional dependencies:
+
+```bash
+node --test src/tests/sharing.test.js
+```
+
 ### Running the website locally
 
 1. From VS Code's Run and Debug view (Ctrl+Shift+D), select "Launch Mergington WebApp" from the launch configuration dropdown

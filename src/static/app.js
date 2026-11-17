@@ -1,3 +1,5 @@
+import { createActivitySharing, getActivityId } from "./sharing.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   // DOM elements
   const activitiesList = document.getElementById("activities-list");
@@ -40,6 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
+  let focusedActivityHash = "";
 
   // Authentication state
   let currentUser = null;
@@ -470,12 +473,48 @@ document.addEventListener("DOMContentLoaded", () => {
     Object.entries(filteredActivities).forEach(([name, details]) => {
       renderActivityCard(name, details);
     });
+
+    focusSharedActivity();
   }
+
+  function focusSharedActivity() {
+    const hash = window.location.hash;
+    activitiesList.querySelectorAll(".shared-activity").forEach((card) => {
+      card.classList.remove("shared-activity");
+    });
+    if (!hash) {
+      focusedActivityHash = "";
+      return;
+    }
+
+    let activityId;
+    try {
+      activityId = decodeURIComponent(hash.slice(1));
+    } catch (error) {
+      console.error("Invalid activity link:", error);
+      return;
+    }
+
+    const activityCard = document.getElementById(activityId);
+    if (activityCard?.classList.contains("activity-card")) {
+      activityCard.classList.add("shared-activity");
+      if (hash === focusedActivityHash) {
+        return;
+      }
+      activityCard.focus({ preventScroll: true });
+      activityCard.scrollIntoView({ block: "center" });
+      focusedActivityHash = hash;
+    }
+  }
+
+  window.addEventListener("hashchange", focusSharedActivity);
 
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
+    activityCard.id = getActivityId(name);
+    activityCard.tabIndex = -1;
 
     // Calculate spots and capacity
     const totalSpots = details.max_participants;
@@ -587,6 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    activityCard.appendChild(createActivitySharing(name));
     activitiesList.appendChild(activityCard);
   }
 
